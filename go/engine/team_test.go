@@ -3,12 +3,26 @@
 
 package engine
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestPostNewTeam(t *testing.T) {
 	tc := SetupEngineTest(t, "crypto")
 	defer tc.Cleanup()
 
 	u := CreateAndSignupFakeUser(tc, "teams")
-	panic(u.Username)
+
+	teamName := u.Username + "_team"
+	eng := NewNewTeamEngine(tc.G, teamName)
+
+	ctx := &Context{
+		LogUI:    tc.G.UI.GetLogUI(),
+		SecretUI: u.NewSecretUI(),
+	}
+	err := eng.Run(ctx)
+
+	require.NoError(t, err)
 }

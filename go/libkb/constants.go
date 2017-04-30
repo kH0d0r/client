@@ -259,6 +259,8 @@ const (
 	LinkTypeUpdateSettings             = "update_settings"
 	LinkTypeWebServiceBinding          = "web_service_binding"
 
+	TeamLinkTypeRoot LinkType = "team.root"
+
 	DelegationTypeEldest      DelegationType = "eldest"
 	DelegationTypePGPUpdate                  = "pgp_update"
 	DelegationTypeSibkey                     = "sibkey"
