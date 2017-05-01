@@ -102,7 +102,7 @@ func (e *NewTeamEngine) Run(ctx *Context) (err error) {
 	sigMultiItem.SetKey("signing_kid", jsonw.NewString(sigKey.GetKID().String()))
 	sigMultiItem.SetKey("type", jsonw.NewString(string(v1LinkType)))
 	sigMultiItem.SetKey("sig_inner", jsonw.NewString(string(innerJSONBytes)))
-	sigMultiItem.SetKey("team_id", jsonw.NewString("abababababababababababababababab"))
+	sigMultiItem.SetKey("team_id", jsonw.NewString(libkb.RootTeamIDFromName(e.name)))
 
 	sigMultiList := jsonw.NewArray(1)
 	err = sigMultiList.SetIndex(0, sigMultiItem)

@@ -9,8 +9,10 @@ package libkb
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"strings"
 
 	keybase1 "github.com/keybase/client/go/protocol/keybase1"
 	jsonw "github.com/keybase/go-jsonw"
@@ -589,8 +591,14 @@ func (u *User) TeamRootSig(key GenericKey, name string) (*jsonw.Wrapper, error) 
 	}
 	team := jsonw.NewDictionary()
 	team.SetKey("name", jsonw.NewString(name))
-	team.SetKey("id", jsonw.NewString("abababababababababababababababab"))
+	team.SetKey("id", jsonw.NewString(RootTeamIDFromName(name)))
 	body := ret.AtKey("body")
 	body.SetKey("team", team)
 	return ret, nil
+}
+
+// the first 15 bytes of the sha256 of the lowercase team name, followed by the byte 0x24, encoded as hex
+func RootTeamIDFromName(name string) string {
+	sum := sha256.Sum256([]byte(strings.ToLower(name)))
+	return hex.EncodeToString(sum[0:15]) + "24"
 }

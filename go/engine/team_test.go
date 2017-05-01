@@ -13,9 +13,12 @@ func TestPostNewTeam(t *testing.T) {
 	tc := SetupEngineTest(t, "crypto")
 	defer tc.Cleanup()
 
-	u := CreateAndSignupFakeUser(tc, "teams")
+	// Note that the length limit for a team name, with the additional suffix
+	// below, is 16 characters. We have 5 to play with, including the implicit
+	// underscore after the prefix.
+	u := CreateAndSignupFakeUser(tc, "t")
 
-	teamName := u.Username + "_team"
+	teamName := u.Username + "T"
 	eng := NewNewTeamEngine(tc.G, teamName)
 
 	ctx := &Context{
