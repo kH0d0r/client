@@ -577,5 +577,10 @@ func (u *User) TeamRootSig(key GenericKey, name string) (*jsonw.Wrapper, error) 
 	if err != nil {
 		return nil, err
 	}
+	team := jsonw.NewDictionary()
+	team.SetKey("name", jsonw.NewString(name))
+	team.SetKey("id", jsonw.NewString("TODO JUNK"))
+	body := ret.AtKey("body")
+	body.SetKey("team", team)
 	return ret, nil
 }

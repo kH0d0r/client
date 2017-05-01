@@ -3,7 +3,10 @@
 
 package engine
 
-import "github.com/keybase/client/go/libkb"
+import (
+	"github.com/keybase/client/go/libkb"
+	jsonw "github.com/keybase/go-jsonw"
+)
 
 type NewTeamEngine struct {
 	libkb.Contextified
@@ -93,15 +96,29 @@ func (e *NewTeamEngine) Run(ctx *Context) (err error) {
 		return err
 	}
 
+	sigMultiItem := jsonw.NewDictionary()
+	sigMultiItem.SetKey("sig", jsonw.NewString(sig))
+	sigMultiItem.SetKey("signing_kid", jsonw.NewString(sigKey.GetKID().String()))
+	sigMultiItem.SetKey("type", jsonw.NewString(string(v1LinkType)))
+	sigMultiItem.SetKey("sig_inner", jsonw.NewString(string(innerJSONBytes)))
+	sigMultiItem.SetKey("team_id", jsonw.NewString("TODO JUNK"))
+
+	sigMultiList := jsonw.NewArray(1)
+	err = sigMultiList.SetIndex(0, sigMultiItem)
+	if err != nil {
+		return err
+	}
+
+	sigsString, err := sigMultiList.Marshal()
+	if err != nil {
+		return err
+	}
+
 	_, err = e.G().API.Post(libkb.APIArg{
-		Endpoint:    "sig/post",
+		Endpoint:    "key/multi",
 		SessionType: libkb.APISessionTypeREQUIRED,
 		Args: libkb.HTTPArgs{
-			"sig":             libkb.S{Val: sig},
-			"signing_kid":     libkb.S{Val: sigKey.GetKID().String()},
-			"is_remote_proof": libkb.B{Val: false},
-			"type":            libkb.S{Val: string(v1LinkType)},
-			"sig_inner":       libkb.S{Val: string(innerJSONBytes)},
+			"sigs": libkb.S{Val: string(sigsString)},
 		},
 	})
 	if err != nil {

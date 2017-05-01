@@ -12,6 +12,7 @@ import (
 
 type SigchainV2Type int
 
+// These values must match constants.iced in the proofs library.
 const (
 	SigchainV2TypeNone                        SigchainV2Type = 0
 	SigchainV2TypeEldest                      SigchainV2Type = 1
@@ -27,7 +28,9 @@ const (
 	SigchainV2TypeSibkey                      SigchainV2Type = 11
 	SigchainV2TypeSubkey                      SigchainV2Type = 12
 	SigchainV2TypePGPUpdate                   SigchainV2Type = 13
-	SigchainV2TypeTeamRoot                    SigchainV2Type = 14
+
+	// teams link types
+	SigchainV2TypeTeamRoot SigchainV2Type = 33
 )
 
 func (t SigchainV2Type) NeedsSignature() bool {
