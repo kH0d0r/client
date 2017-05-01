@@ -571,7 +571,7 @@ func (u *User) UpdateEmailProof(key GenericKey, newEmail string) (*jsonw.Wrapper
 func (u *User) TeamRootSig(key GenericKey, name string) (*jsonw.Wrapper, error) {
 	ret, err := ProofMetadata{
 		Me:         u,
-		LinkType:   TeamLinkTypeRoot,
+		LinkType:   LinkTypeTeamRoot,
 		SigningKey: key,
 	}.ToJSON(u.G())
 	if err != nil {

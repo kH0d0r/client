@@ -3,6 +3,7 @@ package libkb
 import (
 	"encoding/base64"
 	"fmt"
+
 	keybase1 "github.com/keybase/client/go/protocol/keybase1"
 )
 
@@ -26,6 +27,7 @@ const (
 	SigchainV2TypeSibkey                      SigchainV2Type = 11
 	SigchainV2TypeSubkey                      SigchainV2Type = 12
 	SigchainV2TypePGPUpdate                   SigchainV2Type = 13
+	SigchainV2TypeTeamRoot                    SigchainV2Type = 14
 )
 
 func (t SigchainV2Type) NeedsSignature() bool {
@@ -127,6 +129,8 @@ func SigchainV2TypeFromV1TypeAndRevocations(s string, hasRevocations bool) (ret 
 		ret = SigchainV2TypeSubkey
 	case "pgp_update":
 		ret = SigchainV2TypePGPUpdate
+	case "team.root":
+		ret = SigchainV2TypeTeamRoot
 	default:
 		ret = SigchainV2TypeNone
 		err = ChainLinkError{fmt.Sprintf("Unknown sig v1 type: %s", s)}
