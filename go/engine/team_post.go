@@ -61,7 +61,25 @@ func (e *NewTeamEngine) Run(ctx *Context) (err error) {
 		return err
 	}
 
-	innerJSON, err := me.TeamRootSig(sigKey, e.name)
+	id := libkb.RootTeamIDFromName(e.name)
+	teamSection := libkb.TeamSection{
+		Name: e.name,
+		ID:   id,
+	}
+	teamSection.Members.Owner = []string{}
+	teamSection.Members.Admin = []string{}
+	teamSection.Members.Writer = []string{}
+	teamSection.Members.Reader = []string{}
+	teamSection.SharedKey.Boxes = map[string]string{}
+
+	ephemeralPair, err := libkb.GenerateNaclDHKeyPair()
+	if err != nil {
+		return err
+	}
+	teamSection.SharedKey.E = ephemeralPair.Public.GetKID().String()
+	teamSection.SharedKey.Gen = 1
+
+	innerJSON, err := me.TeamRootSig(sigKey, teamSection)
 	if err != nil {
 		return err
 	}
@@ -110,7 +128,8 @@ func (e *NewTeamEngine) Run(ctx *Context) (err error) {
 		return err
 	}
 
-	sigsString, err := sigMultiList.Marshal()
+	sigsBytes, err := sigMultiList.Marshal()
+	sigsString := string(sigsBytes)
 	if err != nil {
 		return err
 	}
@@ -119,7 +138,7 @@ func (e *NewTeamEngine) Run(ctx *Context) (err error) {
 		Endpoint:    "key/multi",
 		SessionType: libkb.APISessionTypeREQUIRED,
 		Args: libkb.HTTPArgs{
-			"sigs": libkb.S{Val: string(sigsString)},
+			"sigs": libkb.S{Val: sigsString},
 		},
 	})
 	if err != nil {

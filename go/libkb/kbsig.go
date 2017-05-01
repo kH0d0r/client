@@ -11,6 +11,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -579,7 +580,23 @@ func (u *User) UpdateEmailProof(key GenericKey, newEmail string) (*jsonw.Wrapper
 	return ret, nil
 }
 
-func (u *User) TeamRootSig(key GenericKey, name string) (*jsonw.Wrapper, error) {
+type TeamSection struct {
+	Name    string `json:"name"`
+	ID      string `json:"id"`
+	Members struct {
+		Owner  []string `json:"owner"`
+		Admin  []string `json:"admin"`
+		Writer []string `json:"writer"`
+		Reader []string `json:"reader"`
+	} `json:"members"`
+	SharedKey struct {
+		E     string            `json:"E"`
+		Boxes map[string]string `json:"boxes"`
+		Gen   int               `json:"gen"`
+	} `json:"shared_key"`
+}
+
+func (u *User) TeamRootSig(key GenericKey, team TeamSection) (*jsonw.Wrapper, error) {
 	ret, err := ProofMetadata{
 		Me:         u,
 		LinkType:   LinkTypeTeamRoot,
@@ -589,11 +606,16 @@ func (u *User) TeamRootSig(key GenericKey, name string) (*jsonw.Wrapper, error) 
 	if err != nil {
 		return nil, err
 	}
-	team := jsonw.NewDictionary()
-	team.SetKey("name", jsonw.NewString(name))
-	team.SetKey("id", jsonw.NewString(RootTeamIDFromName(name)))
+	jsonStr, err := json.Marshal(team)
+	if err != nil {
+		return nil, err
+	}
+	teamJSON, err := jsonw.Unmarshal(jsonStr)
+	if err != nil {
+		return nil, err
+	}
 	body := ret.AtKey("body")
-	body.SetKey("team", team)
+	body.SetKey("team", teamJSON)
 	return ret, nil
 }
 
