@@ -240,7 +240,7 @@ func remoteProofToTrackingStatement(s RemoteProofChainLink, base *jsonw.Wrapper)
 type ProofMetadata struct {
 	Me             *User
 	SigningUser    UserBasic
-	LastSeqno      Seqno
+	Seqno          Seqno
 	PrevLinkID     LinkID
 	LinkType       LinkType
 	SigningKey     GenericKey
@@ -259,9 +259,18 @@ func (arg ProofMetadata) ToJSON(g *GlobalContext) (ret *jsonw.Wrapper, err error
 	var seqno int
 	var prev *jsonw.Wrapper
 
-	if arg.LastSeqno > 0 {
-		seqno = int(arg.LastSeqno) + 1
-		prev = jsonw.NewString(arg.PrevLinkID.String())
+	// sanity check the seqno and prev relationship
+	if arg.Seqno > 1 && len(arg.PrevLinkID) == 0 {
+		return nil, fmt.Errorf("can't have a seqno > 1 without a prev value")
+	}
+
+	if arg.Seqno > 0 {
+		seqno = int(arg.Seqno)
+		if arg.Seqno == 1 {
+			prev = jsonw.NewNil()
+		} else {
+			prev = jsonw.NewString(arg.PrevLinkID.String())
+		}
 	} else {
 		lastSeqno := arg.Me.sigChain().GetLastKnownSeqno()
 		lastLink := arg.Me.sigChain().GetLastKnownID()
@@ -349,7 +358,7 @@ func (u *User) UntrackingProofFor(signingKey GenericKey, u2 *User) (ret *jsonw.W
 }
 
 // arg.Me user is used to get the last known seqno in ProofMetadata.
-// If arg.Me == nil, set arg.LastSeqno.
+// If arg.Me == nil, set arg.Seqno.
 func KeyProof(arg Delegator) (ret *jsonw.Wrapper, err error) {
 	var kp *jsonw.Wrapper
 	includePGPHash := false
@@ -387,7 +396,7 @@ func KeyProof(arg Delegator) (ret *jsonw.Wrapper, err error) {
 		Eldest:         arg.EldestKID,
 		CreationTime:   arg.Ctime,
 		IncludePGPHash: includePGPHash,
-		LastSeqno:      arg.LastSeqno,
+		Seqno:          arg.Seqno,
 		PrevLinkID:     arg.PrevLinkID,
 	}.ToJSON(arg.G())
 
@@ -573,13 +582,14 @@ func (u *User) TeamRootSig(key GenericKey, name string) (*jsonw.Wrapper, error) 
 		Me:         u,
 		LinkType:   LinkTypeTeamRoot,
 		SigningKey: key,
+		Seqno:      1,
 	}.ToJSON(u.G())
 	if err != nil {
 		return nil, err
 	}
 	team := jsonw.NewDictionary()
 	team.SetKey("name", jsonw.NewString(name))
-	team.SetKey("id", jsonw.NewString("TODO JUNK"))
+	team.SetKey("id", jsonw.NewString("abababababababababababababababab"))
 	body := ret.AtKey("body")
 	body.SetKey("team", team)
 	return ret, nil
