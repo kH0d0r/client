@@ -136,10 +136,14 @@ var CodeSigningProdKIDs = []string{
 var CodeSigningTestKIDs = []string{}
 var CodeSigningStagingKIDs = []string{}
 
+type SigVersion int
+
+const KeybaseSignatureV1 SigVersion = 1
+const KeybaseSignatureV2 SigVersion = 2
+
 const (
-	KeybaseKIDV1       = 1 // Uses SHA-256
-	KeybaseSignatureV1 = 1
-	OneYearInSeconds   = 24 * 60 * 60 * 365
+	KeybaseKIDV1     = 1 // Uses SHA-256
+	OneYearInSeconds = 24 * 60 * 60 * 365
 
 	SigExpireIn       = OneYearInSeconds * 16 // 16 years
 	NaclEdDSAExpireIn = OneYearInSeconds * 16 // 16 years

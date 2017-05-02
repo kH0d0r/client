@@ -251,6 +251,7 @@ type ProofMetadata struct {
 	CreationTime   int64
 	ExpireIn       int
 	IncludePGPHash bool
+	SigVersion     SigVersion
 }
 
 func (arg ProofMetadata) ToJSON(g *GlobalContext) (ret *jsonw.Wrapper, err error) {
@@ -310,7 +311,12 @@ func (arg ProofMetadata) ToJSON(g *GlobalContext) (ret *jsonw.Wrapper, err error
 
 	body := jsonw.NewDictionary()
 
-	body.SetKey("version", jsonw.NewInt(KeybaseSignatureV1))
+	if arg.SigVersion != 0 {
+		body.SetKey("version", jsonw.NewInt(int(arg.SigVersion)))
+	} else {
+		body.SetKey("version", jsonw.NewInt(int(KeybaseSignatureV1)))
+	}
+
 	body.SetKey("type", jsonw.NewString(string(arg.LinkType)))
 
 	key, err := KeySection{
@@ -602,6 +608,7 @@ func (u *User) TeamRootSig(key GenericKey, team TeamSection) (*jsonw.Wrapper, er
 		LinkType:   LinkTypeTeamRoot,
 		SigningKey: key,
 		Seqno:      1,
+		SigVersion: KeybaseSignatureV2,
 	}.ToJSON(u.G())
 	if err != nil {
 		return nil, err
