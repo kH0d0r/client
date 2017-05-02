@@ -66,7 +66,7 @@ func (e *NewTeamEngine) Run(ctx *Context) (err error) {
 		Name: e.name,
 		ID:   id,
 	}
-	teamSection.Members.Owner = []string{}
+	teamSection.Members.Owner = []string{me.GetName()}
 	teamSection.Members.Admin = []string{}
 	teamSection.Members.Writer = []string{}
 	teamSection.Members.Reader = []string{}
